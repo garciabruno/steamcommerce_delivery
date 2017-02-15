@@ -702,7 +702,16 @@ class DeliveryBot(object):
             else:
                 email = gift.get('email')
 
-            log.info(u'Sending gift {0} assetid {1} to {2}'.format(name, assetid, email))
+            log.info(
+                u'Sending gift {0} assetid {1} to {2} for request {3}-{4} relation {5}'.format(
+                    name,
+                    assetid,
+                    email,
+                    relation_type,
+                    request_id,
+                    relation_id
+                )
+            )
 
             result = self.web_account.send_gift(assetid, email, relation_type, relation_id)
 
@@ -712,7 +721,14 @@ class DeliveryBot(object):
                 email = self.get_special_email(relation_type, relation_id, request_id)
 
                 log.info(
-                    u'Attempting to send gift {0} assetid {1} to special email {2}'.format(name, assetid, email)
+                    u'Sending gift {0} assetid {1} to {2} for request {3}-{4} relation {5}'.format(
+                        name,
+                        assetid,
+                        email,
+                        relation_type,
+                        request_id,
+                        relation_id
+                    )
                 )
 
                 result = self.web_account.send_gift(assetid, email, relation_type, relation_id)
