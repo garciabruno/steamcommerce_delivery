@@ -684,7 +684,7 @@ class DeliveryBot(object):
             request_id
         )
 
-    def send_gifts(self, only_use_special_email=False):
+    def send_gifts(self, only_use_special_emails=False):
         if not self.web_account:
             return None
 
@@ -697,7 +697,7 @@ class DeliveryBot(object):
             relation_id = gift.get('relation_id')
             relation_type = gift.get('relation_type')
 
-            if only_use_special_email:
+            if only_use_special_emails:
                 email = self.get_special_email(relation_type, relation_id, request_id)
             else:
                 email = gift.get('email')
@@ -706,7 +706,7 @@ class DeliveryBot(object):
 
             result = self.web_account.send_gift(assetid, email, relation_type, relation_id)
 
-            if EResult(result) != EResult.OK and not only_use_special_email:
+            if EResult(result) != EResult.OK and not only_use_special_emails:
                 log.info(u'Sending failed, received {}'.format(repr(EResult(result))))
 
                 email = self.get_special_email(relation_type, relation_id, request_id)
