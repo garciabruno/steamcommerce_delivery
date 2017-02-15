@@ -738,7 +738,7 @@ class DeliveryBot(object):
 
                 continue
 
-            log.info(u'Sent gift {0} with assetid {1} succesfuly'.format(name, assetid))
+            log.info(u'Sent gift {} succesfuly'.format(name))
 
             if relation_type == 'A':
                 relation = userrequest.UserRequest()._get_relation_id(relation_id)
@@ -776,7 +776,7 @@ class DeliveryBot(object):
         for userrequest_data in userrequests:
             if (
                 userrequest_data.products.filter(sent=False).count() == 0 and
-                paidrequest_data.assigned.id == self.owner_id
+                userrequest_data.assigned.id == self.owner_id
             ):
                 log.info(u'Accepting request A-{}'.format(userrequest_data.id))
                 userrequest.UserRequest().accept_userrequest(userrequest_data.id, self.owner_id)
