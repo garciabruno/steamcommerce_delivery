@@ -61,4 +61,4 @@ if __name__ == '__main__':
         delivery_bot.accept_gifts()
         delivery_bot.send_gifts(only_use_special_emails=BOT['only_use_special_emails'])
 
-        delivery_bot.release_lock()
+        delivery_bot.web_account.release_lock()
