@@ -585,8 +585,6 @@ class WebAccount(object):
 class DeliveryBot(object):
     def __init__(self, owner_id, account_name, password, shared_secret, use_2fa=True):
         self.web_account = WebAccount(account_name, password, shared_secret, use_2fa=use_2fa)
-        self.web_account.init_session()
-
         self.owner_id = owner_id
 
     def get_pending_deliveries(self):
@@ -686,7 +684,7 @@ class DeliveryBot(object):
             request_id
         )
 
-    def send_gifts(self):
+    def send_gifts(self, only_use_special_email=False):
         if not self.web_account:
             return None
 
@@ -694,17 +692,21 @@ class DeliveryBot(object):
 
         for gift in pending_gifts:
             name = gift.get('name')
-            email = gift.get('email')
             assetid = gift.get('assetid')
             request_id = gift.get('request_id')
             relation_id = gift.get('relation_id')
             relation_type = gift.get('relation_type')
 
+            if only_use_special_email:
+                email = self.get_special_email(relation_type, relation_id, request_id)
+            else:
+                email = gift.get('email')
+
             log.info(u'Sending gift {0} assetid {1} to {2}'.format(name, assetid, email))
 
             result = self.web_account.send_gift(assetid, email, relation_type, relation_id)
 
-            if EResult(result) != EResult.OK:
+            if EResult(result) != EResult.OK and not only_use_special_email:
                 log.info(u'Sending failed, received {}'.format(repr(EResult(result))))
 
                 email = self.get_special_email(relation_type, relation_id, request_id)
