@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:Utf-8 -*-
 
+import os
 import json
 import config
 
@@ -8,7 +9,7 @@ from core import bot
 
 
 def file_to_json(path):
-    f = open(path, 'r')
+    f = open(os.path.join(os.getcwd(), path), 'r')
     raw = f.read()
     f.close()
 
