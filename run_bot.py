@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
         delivery_bot.web_account.acquire_lock()
 
-        if delivery_bot.web_account().lock_is_present():
+        if delivery_bot.web_account.lock_is_present():
             bot.log.info(
                 u'Cannot init session for {}. Lock is present'.format(
                     data['account_name']
