@@ -820,21 +820,21 @@ class DeliveryBot(object):
                 )
             )
 
+            sender_steam_id_matches = re.findall(
+                r'http://steamcommunity\.com/profiles/([0-9]+)',
+                gift.from_link,
+                re.DOTALL
+            )
+
+            if not len(sender_steam_id_matches):
+                log.error(u'Regex failed to retrieve steam sender id')
+
+                continue
+
+            sender_steam_id = sender_steam_id_matches[0]
+
             if not gift.accept_button or 'UnpackGift' in gift.accept_button:
                 log.info(u'Gift cannot be accepted to inventory')
-
-                sender_steam_id_matches = re.findall(
-                    r'http://steamcommunity\.com/profiles/([0-9]+)',
-                    gift.from_link,
-                    re.DOTALL
-                )
-
-                if not len(sender_steam_id_matches):
-                    log.error(u'Regex failed to retrieve steam sender id')
-
-                    continue
-
-                sender_steam_id = sender_steam_id_matches[0]
 
                 log.info(
                     u'Declining gift id {0} to sender id {1}'.format(
