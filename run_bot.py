@@ -45,8 +45,6 @@ if __name__ == '__main__':
             use_2fa=BOT['use_2fa']
         )
 
-        delivery_bot.web_account.acquire_lock()
-
         if delivery_bot.web_account.lock_is_present():
             bot.log.info(
                 u'Cannot init session for {}. Lock is present'.format(
@@ -56,6 +54,7 @@ if __name__ == '__main__':
 
             continue
 
+        delivery_bot.web_account.acquire_lock()
         delivery_bot.web_account.init_session()
 
         delivery_bot.track_gifts()
