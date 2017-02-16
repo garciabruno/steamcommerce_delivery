@@ -3,9 +3,23 @@
 
 import os
 import json
+import rollbar
 import config
 
 from core import bot
+
+'''
+    config.BOTS example
+
+    [
+        {
+            'owner_id': 1,
+            'use_2fa': True,
+            'only_use_special_emails': False,
+            'data_path': 'data/bot.json'
+        }
+    ]
+'''
 
 
 def file_to_json(path):
@@ -21,20 +35,7 @@ def file_to_json(path):
     return data
 
 
-if __name__ == '__main__':
-    '''
-        config.BOTS example
-
-        [
-            {
-                'owner_id': 1,
-                'use_2fa': True,
-                'only_use_special_emails': False,
-                'data_path': 'data/bot.json'
-            }
-        ]
-    '''
-
+def run_bot():
     for BOT in config.BOTS:
         data = file_to_json(BOT['data_path'])
 
@@ -63,3 +64,16 @@ if __name__ == '__main__':
         delivery_bot.send_gifts(only_use_special_emails=BOT['only_use_special_emails'])
 
         delivery_bot.web_account.release_lock()
+
+
+if __name__ == '__main__':
+    rollbar.init(config.ROLLBAR_TOKEN, 'production')  # access_token, environment
+
+    try:
+        run_bot()
+    except IOError:
+        rollbar.report_message('Got an IOError in the main loop', 'warning')
+    except:
+        # catch-all
+
+        rollbar.report_exc_info()
