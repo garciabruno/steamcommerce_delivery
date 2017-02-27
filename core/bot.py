@@ -24,7 +24,6 @@ from steamcommerce_api.api import asset as asset_api
 from steamcommerce_api.enums import EAssetHistoryState
 
 from steamcommerce_api.cache import cache
-from steamcommerce_api.caching import cache_layer
 
 log = logger.Logger('steamcommerce.delivery.bot', 'steamcommerce.delivery.bot.log').get_logger()
 
@@ -153,8 +152,13 @@ class WebAccount(object):
 
         return description_indexes
 
-    @cache_layer.get_or_cache('delivery/validateunpack/{0}')
     def get_item_info_from_unpack(self, assetid):
+        cache_key = 'delivery/validateunpack/{}'.format(assetid)
+        cached = cache.get(cache_key)
+
+        if cached:
+            return json.loads(cached)
+
         log.info(u'Validate unpack for assetid {}'.format(assetid))
 
         try:
@@ -188,10 +192,14 @@ class WebAccount(object):
         if not data.get('success'):
             return enums.WebAccountResult.Failed.value
 
-        return {
+        unpack_data = {
             'type': 'sub',
             'id': data.get('packageid')
         }
+
+        cache.set(cache_key, json.dumps(unpack_data))
+
+        return unpack_data
 
     def get_item_info(self, actions, assetid):
         item_info = {}
