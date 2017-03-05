@@ -41,7 +41,7 @@ class WebAccount(object):
         return bool(cache.get(self.lock_cache_key) or 0)
 
     def acquire_lock(self):
-        cache.set(self.lock_cache_key, 1)
+        cache.set(self.lock_cache_key, 1, timeout=10 * 60)
 
     def release_lock(self):
         cache.delete(self.lock_cache_key)
