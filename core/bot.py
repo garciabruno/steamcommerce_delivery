@@ -557,7 +557,7 @@ class WebAccount(object):
         )
 
         if req.status_code != 200:
-            log.info(u'Gift submit received status code {1}'.format(assetid, req.status))
+            log.info(u'Gift submit received status code {1}'.format(assetid, req.status_code))
 
             return EResult.Fail
 
