@@ -258,6 +258,13 @@ class WebAccount(object):
             )
         )
 
+        if not inventory_data.get('descriptions'):
+            log.error(
+                u'Inventory data did not contain any descriptions. Possible steam failure'
+            )
+
+            return enums.WebAccountResult.Failed
+
         description_indexes = self.get_description_indexes(
             inventory_data.get('descriptions'),
             filter_sent=filter_sent
