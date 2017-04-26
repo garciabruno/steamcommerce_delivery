@@ -10,13 +10,16 @@ import datetime
 
 import steam.guard
 import steam.webauth
-from steam import SteamID
+
+from steam import WebAPI
 from steam.enums import EResult
 
 import enums
 import config
+
 from core import items
 
+from steamcommerce_api import config as backend_config
 from steamcommerce_api.api import logger
 from steamcommerce_api.api import delivery
 from steamcommerce_api.api import userrequest
@@ -246,7 +249,7 @@ class WebAccount(object):
 
         inventory_data = self.get_steam_inventory(steam_id, app_id, context_id)
 
-        if type(inventory_data) == enums.WebAccountResult:
+        if type(inventory_data) is enums.WebAccountResult:
             return inventory_data
 
         if not inventory_data.get('success'):
@@ -620,6 +623,12 @@ class DeliveryBot(object):
         )
 
         unsent_items = self.web_account.get_inventory_items(filter_sent=True)
+
+        if type(unsent_items) is enums.WebAccountResult:
+            log.error(u'Unable to retrieve unsent items')
+
+            return
+
         unsent_items_count = sum([len(unsent_items[x]) for x in unsent_items.keys()])
 
         log.info(u'Found {} unsent gifts'.format(unsent_items_count))
@@ -836,8 +845,41 @@ class DeliveryBot(object):
                 )
             )
 
-            sender = SteamID.from_url(gift.from_link)
-            sender_steam_id = sender.as_64
+            match = re.match(
+                r'^https?://steamcommunity.com/(?P<type>profiles|id|gid|groups)/(?P<value>.*)/?$',
+                gift.from_link
+            )
+
+            if not match:
+                log.error(u'Could not match steamcommunity URL from {}'.format(gift.from_link))
+
+                continue
+
+            if match.group('type') == 'profiles':
+                sender_steam_id = match.group('value')
+            else:
+                api = WebAPI(backend_config.STEAM_API_KEY)
+
+                api_result = api.call(
+                    'ISteamUser.ResolveVanityURL',
+                    vanityurl=match.group('value'),
+                    url_type=1,
+                    format='json'
+                )
+
+                if (
+                    not api_result.get('response') or
+                    api_result.get('response').get('success') != 1
+                ):
+                    log.error(
+                        u'Unable to resolve sender steamid, ResolveVanityURL returned {}'.format(
+                            api_result
+                        )
+                    )
+
+                    continue
+                else:
+                    sender_steam_id = api_result.get('response').get('steamid')
 
             if not gift.accept_button or 'UnpackGift' in gift.accept_button:
                 log.info(u'Gift cannot be accepted to inventory')
@@ -884,6 +926,12 @@ class DeliveryBot(object):
 
     def track_gifts(self):
         sent_items = self.web_account.get_inventory_items(filter_sent=False)
+
+        if type(sent_items) is enums.WebAccountResult:
+            log.error(u'Unable to retrieve sent items')
+
+            return
+
         unsent_items_count = sum([len(sent_items[x]) for x in sent_items.keys()])
 
         log.info(u'Found {} sent gifts'.format(unsent_items_count))
