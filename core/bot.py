@@ -627,7 +627,7 @@ class DeliveryBot(object):
         if type(unsent_items) is enums.WebAccountResult:
             log.error(u'Unable to retrieve unsent items')
 
-            return
+            return []
 
         unsent_items_count = sum([len(unsent_items[x]) for x in unsent_items.keys()])
 
